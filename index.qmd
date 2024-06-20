@@ -1,0 +1,147 @@
+---
+title: "tablero-delitos"
+format: 
+    dashboard: 
+      orientation: rows 
+---
+
+"carga de datos"
+
+```{r}
+library(tidyverse)
+library(plotly)
+library(DT)
+library(leaflet)
+library(leafem)
+```
+
+```{r}
+#| label: carga-datos
+
+delitos <-
+  read_delim("estadisticaspoliciales2023.csv")
+```
+
+## Generales
+
+## Row
+
+```{r}
+#| label: grafico-delitos
+#| title: "Cantidad de delitos por tipo"
+
+
+grafico_ggplot2 <-
+delitos |>
+  group_by(Delito) |>
+  summarise(n = n()) |>
+  ggplot(aes(
+    x = Delito,
+    y = n
+  )) + 
+  geom_col()+
+  coord_flip()+
+  xlab("tipo de delitos")+
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+## Row
+
+```{r}
+#| label: grafico-nacionalidades-delitos
+#| title: "Cantidad de delitos por nacionalidad"
+
+
+grafico_ggplot2 <-
+delitos |>
+  group_by(Nacionalidad) |>
+  summarise(n = n()) |>
+  slice(1:7) |>
+  ggplot(aes(
+    x = reorder(Nacionalidad,-n),
+    y = n
+  )) + 
+  geom_col()+
+  xlab("Nacionalidad")+
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+```{r}
+#| label: grafico-delitos-provincias
+#| title: "Cantidad de delitos por provincia"
+
+
+grafico_ggplot2 <-
+delitos |>
+  group_by(Provincia) |>
+  summarise(n = n()) |>
+  slice(1:7) |>
+  ggplot(aes(
+    x = reorder(Provincia, n),
+    y = n
+  )) + 
+  geom_col()+
+  coord_flip()+
+  xlab("Provincia")+
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+## Homicidio
+
+```{r}
+#|Llabel: Filtro-homicidos
+
+homicidios <- 
+  delitos |>
+  filter(Delito == "HOMICIDIO")
+```
+
+
+## Row {.tabset}
+```{r}
+#| label: grafico-homicidios-delitos
+#| title: "Cantidad de Homicidios por Nacionaliad"
+
+
+grafico_ggplot2 <-
+homicidios |>
+  group_by(Nacionalidad) |>
+  summarise(n = n()) |>
+  arrange(desc(n)) |>
+  slice(1:7) |>
+  ggplot(aes(
+    x = reorder(Nacionalidad, -n),
+    y = n
+  )) + 
+  geom_col() + 
+  xlab("Nacionalidad") +
+  ylab("Cantidad")
+
+ggplotly(grafico_ggplot2) |> config(locale = "es")
+```
+
+
+# otros
+
+```{r}
+#| label: tabla
+
+homicidios |>
+  datatable()
+```
+```{r}
+leaflet()|>
+  addTiles() |>
+  addProviderTiles(providers$Esri.WorldImagery,
+                   group ="imagenes stalitales (ESRI world imagery" ) |> setView(
+                     
+                   )
+  
+```
+
